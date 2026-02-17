@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import inquirer from "inquirer";
-import { loadMnemonic, loadWallet, showAllWalletNames } from "../utils/wallet.js";
+import { loadMnemonic, loadWallet, showAllWalletNames } from "../lib/wallet.js";
 import { logger } from "../lib/logger.js";
 
 export async function registerExportWallet(program: Command) {

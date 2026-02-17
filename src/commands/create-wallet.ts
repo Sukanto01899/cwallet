@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { logger } from "../lib/logger.js";
 import inquirer from "inquirer";
-import { createWallet } from "../utils/wallet.js";
+import { createWallet } from "../lib/wallet.js";
 
 export function registerCreateWallet(program: Command) {
   program
