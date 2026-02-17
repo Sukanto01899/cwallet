@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "ethers": "^6.16.0"
+    "ethers": "^6.16.0",
+    "inquirer": "^13.2.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
