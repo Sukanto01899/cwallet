@@ -24,8 +24,6 @@ program.hook("preAction", (thisCommand, actionCommand) => {
 
   if (bypass.has(cmd)) return;
 
-  console.log(isSetupCompleted());
-
   if (!isSetupCompleted()) {
     console.error("Please run first: cwallet setup");
     process.exit(1);

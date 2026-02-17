@@ -37,7 +37,10 @@ export async function setup() {
       password: hashedPass,
     };
 
-    fs.mkdirSync(cwalletDir);
+    if (!fs.existsSync(cwalletDir)) {
+      fs.mkdirSync(cwalletDir);
+    }
+
     fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
 
     console.log(config);
