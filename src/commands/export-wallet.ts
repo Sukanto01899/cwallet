@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import inquirer from "inquirer";
-import { loadWallet, showAllWalletNames } from "../utils/wallet.js";
+import { loadMnemonic, loadWallet, showAllWalletNames } from "../utils/wallet.js";
 import { logger } from "../lib/logger.js";
 
 export async function registerExportWallet(program: Command) {
@@ -17,8 +17,13 @@ export async function registerExportWallet(program: Command) {
         return;
       }
 
-      if (opt.name && allWallets.includes(opt.name)) {
-        walletName = opt.name;
+      if (opt.name) {
+        if (allWallets.includes(opt.name)) {
+          walletName = opt.name;
+        } else {
+          console.log("Wallet not found");
+          return;
+        }
       } else {
         const { selectedWallet } = await inquirer.prompt([
           {
@@ -35,7 +40,7 @@ export async function registerExportWallet(program: Command) {
       const { selectedType } = await inquirer.prompt([
         {
           type: "select",
-          name: "selectedWallet",
+          name: "selectedType",
           message: "Select a wallet: ",
           choices: [
             { name: "Private key", value: "privatekey" },
@@ -54,10 +59,11 @@ export async function registerExportWallet(program: Command) {
       if (selectedType === "privatekey") {
         console.log(wallet.privateKey);
       } else if (selectedType === "mnemonic") {
+        console.log(loadMnemonic(walletName, answer.password));
       } else {
+        console.log(wallet.privateKey);
+        console.log(loadMnemonic(walletName, answer.password));
       }
-
-      console.log(wallet);
 
       logger.info(`Wallet exported`);
     });

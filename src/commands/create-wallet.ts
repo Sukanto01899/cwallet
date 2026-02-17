@@ -17,6 +17,7 @@ export function registerCreateWallet(program: Command) {
       if (opt.chain === "evm") {
         const en = await createWallet(answers.name, answers.password);
       } else {
+        // later will generate sol wallet
       }
     });
 }
