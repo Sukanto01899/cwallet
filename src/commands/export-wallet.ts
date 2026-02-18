@@ -2,69 +2,81 @@ import { Command } from "commander";
 import inquirer from "inquirer";
 import { loadMnemonic, loadWallet, showAllWalletNames } from "../lib/wallet.js";
 import { logger } from "../lib/logger.js";
+import { getSessionPassword, login } from "../utils/session.js";
 
-export async function registerExportWallet(program: Command) {
+export function registerExportWallet(program: Command) {
   program
     .command("export")
     .description("Select a wallet to export")
     .option("-n, --name <name>", "export wallet")
     .action(async (opt: { name: string }) => {
-      const allWallets = showAllWalletNames();
-      let walletName;
-
-      if (!allWallets || allWallets.length === 0) {
-        logger.error("No wallets found.");
-        return;
-      }
-
-      if (opt.name) {
-        if (allWallets.includes(opt.name)) {
-          walletName = opt.name;
-        } else {
-          console.log("Wallet not found");
+      try {
+        const allWallets = showAllWalletNames();
+        if (!allWallets || allWallets.length === 0) {
+          logger.error("No wallets found.");
           return;
         }
-      } else {
-        const { selectedWallet } = await inquirer.prompt([
+
+        let walletName: string | undefined;
+        if (opt.name) {
+          if (allWallets.includes(opt.name)) {
+            walletName = opt.name;
+          } else {
+            logger.error("Wallet not found.");
+            return;
+          }
+        } else {
+          const { selectedWallet } = await inquirer.prompt([
+            {
+              type: "select",
+              name: "selectedWallet",
+              message: "Select a wallet:",
+              choices: allWallets.map((name) => ({ name, value: name })),
+            },
+          ]);
+          walletName = selectedWallet;
+        }
+
+        if (!walletName) return;
+
+        const { selectedType } = await inquirer.prompt([
           {
             type: "select",
-            name: "selectedWallet",
-            message: "Select a wallet: ",
-            choices: allWallets.map((name) => ({ name, value: name })),
+            name: "selectedType",
+            message: "Select export type:",
+            choices: [
+              { name: "Private key", value: "privatekey" },
+              { name: "Mnemonic phrase", value: "mnemonic" },
+              { name: "Both", value: "both" },
+            ],
           },
         ]);
-        walletName = selectedWallet;
+
+        let password = await getSessionPassword();
+        if (!password) {
+          await login();
+          password = await getSessionPassword();
+        }
+        if (!password) {
+          logger.error("Login required.");
+          return;
+        }
+
+        const wallet = await loadWallet(walletName, password);
+
+        if (selectedType === "privatekey") {
+          logger.info(`Private key:\n${wallet.privateKey}`);
+        } else if (selectedType === "mnemonic") {
+          logger.info(`Mnemonic:\n${loadMnemonic(walletName, password)}`);
+        } else {
+          logger.info(`Private key:\n${wallet.privateKey}`);
+          logger.info(`Mnemonic:\n${loadMnemonic(walletName, password)}`);
+        }
+
+        logger.info("Wallet exported.");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        logger.error(`Export failed: ${message}`);
       }
-
-      //   Select type (privatekey, seed, both)
-      const { selectedType } = await inquirer.prompt([
-        {
-          type: "select",
-          name: "selectedType",
-          message: "Select a wallet: ",
-          choices: [
-            { name: "Private key", value: "privatekey" },
-            { name: "Mnemonic phrase", value: "mnemonic" },
-            { name: "Both", value: "both" },
-          ],
-        },
-      ]);
-
-      const answer = await inquirer.prompt([
-        { type: "password", name: "password", message: "Password:" },
-      ]);
-
-      const wallet = await loadWallet(walletName, answer.password);
-
-      if (selectedType === "privatekey") {
-        console.log(wallet.privateKey);
-      } else if (selectedType === "mnemonic") {
-        console.log(loadMnemonic(walletName, answer.password));
-      } else {
-        console.log(wallet.privateKey);
-        console.log(loadMnemonic(walletName, answer.password));
-      }
-
-      logger.info(`Wallet exported`);
     });
 }

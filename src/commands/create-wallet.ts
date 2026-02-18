@@ -1,29 +1,36 @@
 import { Command } from "commander";
 import { logger } from "../lib/logger.js";
-import inquirer from "inquirer";
 import { createWallet } from "../lib/wallet.js";
-import { clearSessionPassword, getSessionPassword, login } from "../utils/session.js";
+import { getSessionPassword, login } from "../utils/session.js";
 
 export function registerCreateWallet(program: Command) {
   program
     .command("create")
-    .description("create mew wallet")
+    .description("Create new wallet")
     .option("-c, --chain <chain>", "create new wallet", "evm")
     .action(async (opt: { chain: "evm" | "sol" }) => {
       try {
-        const sessionPass = await getSessionPassword();
-
+        let sessionPass = await getSessionPassword();
         if (!sessionPass) {
           await login();
+          sessionPass = await getSessionPassword();
+        }
+        if (!sessionPass) {
+          logger.error("Login required.");
+          return;
         }
 
-        if (opt.chain === "evm" && sessionPass) {
-          const en = await createWallet(sessionPass);
-        } else {
-          // later will generate sol wallet
+        if (opt.chain === "evm") {
+          const address = await createWallet(sessionPass);
+          logger.info("Wallet created successfully.");
+          logger.info(`Address: ${address}`);
+          return;
         }
+
+        logger.error("Unsupported chain. Use --chain evm");
       } catch (err) {
-        console.log(err);
+        const message = err instanceof Error ? err.message : "Unknown error";
+        logger.error(`Create failed: ${message}`);
       }
     });
 }

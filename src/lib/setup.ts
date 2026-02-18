@@ -15,7 +15,7 @@ export function isSetupCompleted() {
 }
 
 export async function setup() {
-  logger.info("Setting up cwallet: \n");
+  logger.info("Setting up cwallet...");
   try {
     const { password } = await inquirer.prompt([
       { type: "password", name: "password", message: "Enter password: " },
@@ -58,18 +58,23 @@ export async function setup() {
       },
     ]);
 
-    setSessionPassword(confirmPassword);
+    await setSessionPassword(confirmPassword);
 
     if (selectLoginType === "create") {
-      const newWallet = createWallet(confirmPassword);
+      const address = await createWallet(confirmPassword);
+      logger.info("Wallet created successfully.");
+      logger.info(`Address: ${address}`);
     } else {
-      const importedWallet = importMnemonic(confirmPassword);
+      const address = await importMnemonic(confirmPassword);
+      logger.info("Wallet imported successfully.");
+      logger.info(`Address: ${address}`);
     }
   } catch (err) {
     if (err instanceof ExitPromptError) {
-      console.log("\nCancelled by user. Exiting...");
+      logger.error("Cancelled by user. Exiting...");
       process.exit(130);
     }
-    throw err;
+    const message = err instanceof Error ? err.message : "Unknown error";
+    logger.error(`Setup failed: ${message}`);
   }
 }

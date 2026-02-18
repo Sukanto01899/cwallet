@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { registerHelloCommand } from "./commands/hello.js";
 import { registerCreateWallet } from "./commands/create-wallet.js";
 import { version } from "./index.js";
 import { registerExportWallet } from "./commands/export-wallet.js";
@@ -8,6 +7,8 @@ import { registerImportWallet } from "./commands/import-wallet.js";
 import { registerSetup } from "./commands/setup.js";
 import { isSetupCompleted } from "./lib/setup.js";
 import { registerShowWallet } from "./commands/show-wallet.js";
+import { registerReset } from "./commands/reset.js";
+import { registerRemoveWallet } from "./commands/remove-wallet.js";
 
 process.on("SIGINT", () => {
   console.log("\nCancelled by user. Exiting...");
@@ -18,7 +19,7 @@ const program = new Command();
 
 program.name("cwallet").description("Command line wallet").version(version);
 
-const bypass = new Set(["setup", "help"]);
+const bypass = new Set(["setup", "help", "reset"]);
 
 program.hook("preAction", (thisCommand, actionCommand) => {
   const cmd = actionCommand.name() ?? thisCommand.args?.[0];
@@ -32,10 +33,11 @@ program.hook("preAction", (thisCommand, actionCommand) => {
 });
 
 registerSetup(program);
-registerHelloCommand(program);
 registerCreateWallet(program);
 registerExportWallet(program);
 registerImportWallet(program);
 registerShowWallet(program);
+registerReset(program);
+registerRemoveWallet(program);
 
 program.parseAsync(process.argv);

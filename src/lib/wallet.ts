@@ -74,7 +74,7 @@ async function walletNameInput() {
 export async function createWallet(password: string) {
   const isPasswordValid = verifyPassword(password);
   if (!isPasswordValid) {
-    return console.log("Password wrong");
+    throw new Error("Password wrong");
   }
 
   const walletName = await walletNameInput();
@@ -97,7 +97,7 @@ export async function createWallet(password: string) {
     encryptedMnemonic,
   });
 
-  logger.info(`Your wallet address: ${wallet.address}`);
+  return wallet.address;
 }
 
 export async function loadWallet(name: string, password: string) {
@@ -152,10 +152,29 @@ export function showAllWalletNames() {
   return walletNames;
 }
 
+export function removeWalletByName(name: string) {
+  const walletFile = path.join(walletDir, walletFileName);
+
+  if (!existsSync(walletFile)) {
+    return false;
+  }
+
+  const readWalletFile = JSON.parse(fs.readFileSync(walletFile, "utf-8")) as Wallets;
+  const wallets = readWalletFile ? readWalletFile : [];
+
+  const next = wallets.filter((wallet) => wallet.name !== name);
+  if (next.length === wallets.length) {
+    return false;
+  }
+
+  fs.writeFileSync(walletFile, JSON.stringify(next, null, 2));
+  return true;
+}
+
 export async function importMnemonic(password: string) {
   const isPasswordValid = verifyPassword(password);
   if (!isPasswordValid) {
-    return console.log("Password wrong");
+    throw new Error("Password wrong");
   }
   const walletName = await walletNameInput();
 
@@ -173,13 +192,13 @@ export async function importMnemonic(password: string) {
     encryptedMnemonic,
   });
 
-  logger.info(`Your wallet address: ${wallet.address}`);
+  return wallet.address;
 }
 
 export async function showWalletAddress(name: string, password: string) {
   const isPasswordValid = verifyPassword(password);
   if (!isPasswordValid) {
-    return console.log("Password wrong");
+    throw new Error("Password wrong");
   }
   const walletFile = path.join(walletDir, walletFileName);
 
