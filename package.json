@@ -1,9 +1,16 @@
 {
   "name": "cwallet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "A TypeScript CLI tool",
   "license": "MIT",
+  "keywords": [
+    "cli",
+    "wallet",
+    "crypto",
+    "ethereum",
+    "evm"
+  ],
   "type": "module",
   "bin": {
     "cwallet": "dist/cli.js"

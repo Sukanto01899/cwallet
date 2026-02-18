@@ -5,13 +5,13 @@ Command-line wallet manager for creating, importing, exporting, and managing EVM
 **Install**
 
 ```bash
-npm install -g cwallet-cli
+npm install -g cwallet
 ```
 
 Or run without install:
 
 ```bash
-npx cwallet-cli <command>
+npx cwallet <command>
 ```
 
 **Quick Start**
@@ -54,21 +54,3 @@ cwallet show
 
 7. `cwallet reset`  
    Clears all local data and session info.
-
-8. `cwallet hello`  
-   Test command.  
-   Options: `--name <name>`
-
-**Development**
-
-```bash
-npm install
-npm run dev -- <command>
-```
-
-**Build**
-
-```bash
-npm run build
-npm start
-```
