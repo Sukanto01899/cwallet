@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { Command } from "commander";
 import { registerCreateWallet } from "./commands/create-wallet.js";
 import { version } from "./index.js";
@@ -9,6 +8,7 @@ import { isSetupCompleted } from "./lib/setup.js";
 import { registerShowWallet } from "./commands/show-wallet.js";
 import { registerReset } from "./commands/reset.js";
 import { registerRemoveWallet } from "./commands/remove-wallet.js";
+import { registerBalanceChecker } from "./commands/check-balance.js";
 
 process.on("SIGINT", () => {
   console.log("\nCancelled by user. Exiting...");
@@ -39,5 +39,6 @@ registerImportWallet(program);
 registerShowWallet(program);
 registerReset(program);
 registerRemoveWallet(program);
+registerBalanceChecker(program);
 
 program.parseAsync(process.argv);
