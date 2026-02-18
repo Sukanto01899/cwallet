@@ -10,21 +10,20 @@ export function registerCreateWallet(program: Command) {
     .description("create mew wallet")
     .option("-c, --chain <chain>", "create new wallet", "evm")
     .action(async (opt: { chain: "evm" | "sol" }) => {
-      const sessionPass = await getSessionPassword();
+      try {
+        const sessionPass = await getSessionPassword();
 
-      if (!sessionPass) {
-        console.log(getSessionPassword());
-        await login();
-      }
-      const answers = await inquirer.prompt([
-        { type: "input", name: "name", message: "Wallet name:" },
-        { type: "password", name: "password", message: "Password:" },
-      ]);
+        if (!sessionPass) {
+          await login();
+        }
 
-      if (opt.chain === "evm") {
-        const en = await createWallet(answers.name, answers.password);
-      } else {
-        // later will generate sol wallet
+        if (opt.chain === "evm" && sessionPass) {
+          const en = await createWallet(sessionPass);
+        } else {
+          // later will generate sol wallet
+        }
+      } catch (err) {
+        console.log(err);
       }
     });
 }

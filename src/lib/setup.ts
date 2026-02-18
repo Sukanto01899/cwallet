@@ -4,12 +4,14 @@ import { hashedPassword } from "../utils/password-manage.js";
 import inquirer from "inquirer";
 import { logger } from "./logger.js";
 import { ExitPromptError } from "@inquirer/core";
+import { createWallet, importMnemonic } from "./wallet.js";
+import { setSessionPassword } from "../utils/session.js";
 
 export function isSetupCompleted() {
   const isDirExist = fs.existsSync(cwalletDir);
-  const isFileExist = fs.existsSync(configFile);
+  const isConfigExist = fs.existsSync(configFile);
 
-  return isFileExist && isDirExist;
+  return isConfigExist && isDirExist;
 }
 
 export async function setup() {
@@ -31,6 +33,7 @@ export async function setup() {
         },
       },
     ]);
+
     const hashedPass = hashedPassword(confirmPassword);
 
     const config = {
@@ -43,7 +46,25 @@ export async function setup() {
 
     fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
 
-    console.log(config);
+    const { selectLoginType } = await inquirer.prompt([
+      {
+        type: "select",
+        name: "selectLoginType",
+        message: "\n\nCreate new or import wallet:",
+        choices: [
+          { name: "Create new wallet", value: "create" },
+          { name: "Import existing wallet", value: "import" },
+        ],
+      },
+    ]);
+
+    setSessionPassword(confirmPassword);
+
+    if (selectLoginType === "create") {
+      const newWallet = createWallet(confirmPassword);
+    } else {
+      const importedWallet = importMnemonic(confirmPassword);
+    }
   } catch (err) {
     if (err instanceof ExitPromptError) {
       console.log("\nCancelled by user. Exiting...");

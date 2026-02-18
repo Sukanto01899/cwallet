@@ -7,6 +7,7 @@ import { registerExportWallet } from "./commands/export-wallet.js";
 import { registerImportWallet } from "./commands/import-wallet.js";
 import { registerSetup } from "./commands/setup.js";
 import { isSetupCompleted } from "./lib/setup.js";
+import { registerShowWallet } from "./commands/show-wallet.js";
 
 process.on("SIGINT", () => {
   console.log("\nCancelled by user. Exiting...");
@@ -35,5 +36,6 @@ registerHelloCommand(program);
 registerCreateWallet(program);
 registerExportWallet(program);
 registerImportWallet(program);
+registerShowWallet(program);
 
 program.parseAsync(process.argv);
